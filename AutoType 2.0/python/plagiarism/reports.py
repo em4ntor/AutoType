@@ -1,0 +1,231 @@
+"""
+Plagiarism reports module for AutoType.
+This module handles generating reports for plagiarism detection results.
+"""
+
+from typing import Dict, List, Any
+import json
+import datetime
+import os
+
+
+def generate_report(plagiarism_results: Dict[str, Any], text: str, output_format: str = "html") -> str:
+    """
+    Generate a report of plagiarism detection results.
+    
+    Args:
+        plagiarism_results: Results from the plagiarism checker
+        text: The original text that was checked
+        output_format: Format of the report ('html', 'text', or 'json')
+    
+    Returns:
+        The generated report as a string
+    """
+    if output_format == "html":
+        return generate_html_report(plagiarism_results, text)
+    elif output_format == "text":
+        return generate_text_report(plagiarism_results, text)
+    elif output_format == "json":
+        return json.dumps(plagiarism_results, indent=2)
+    else:
+        raise ValueError(f"Unsupported output format: {output_format}")
+
+
+def generate_html_report(plagiarism_results: Dict[str, Any], text: str) -> str:
+    """
+    Generate an HTML report of plagiarism detection results.
+    
+    Args:
+        plagiarism_results: Results from the plagiarism checker
+        text: The original text that was checked
+    
+    Returns:
+        HTML report as a string
+    """
+    similarity_score = plagiarism_results.get("similarityScore", 0) * 100
+    sources = plagiarism_results.get("sources", [])
+    highlighted_text = plagiarism_results.get("highlightedText", "")
+    
+    # Generate the HTML
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Plagiarism Report</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                line-height: 1.6;
+            }}
+            .report-header {{
+                text-align: center;
+                margin-bottom: 30px;
+            }}
+            .similarity-score {{
+                font-size: 24px;
+                margin: 20px 0;
+                text-align: center;
+            }}
+            .score-value {{
+                font-weight: bold;
+            }}
+            .score-low {{
+                color: green;
+            }}
+            .score-medium {{
+                color: orange;
+            }}
+            .score-high {{
+                color: red;
+            }}
+            .sources-table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+            }}
+            .sources-table th, .sources-table td {{
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }}
+            .sources-table th {{
+                background-color: #f2f2f2;
+            }}
+            .highlighted-text {{
+                margin: 20px 0;
+                padding: 15px;
+                background-color: #f9f9f9;
+                border: 1px solid #ddd;
+            }}
+            .plagiarism-highlight {{
+                background-color: rgba(255, 0, 0, 0.2);
+                padding: 2px 0;
+            }}
+            .report-footer {{
+                margin-top: 30px;
+                font-size: 12px;
+                color: #666;
+                text-align: center;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="report-header">
+            <h1>Plagiarism Check Report</h1>
+            <p>Generated on {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        </div>
+        
+        <div class="similarity-score">
+            Overall Similarity Score: 
+            <span class="score-value {'score-low' if similarity_score < 20 else 'score-medium' if similarity_score < 40 else 'score-high'}">
+                {similarity_score:.1f}%
+            </span>
+        </div>
+        
+        <h2>Matched Sources ({len(sources)})</h2>
+    """
+    
+    if sources:
+        html += """
+        <table class="sources-table">
+            <tr>
+                <th>#</th>
+                <th>Source</th>
+                <th>Match %</th>
+            </tr>
+        """
+        
+        for i, source in enumerate(sources):
+            html += f"""
+            <tr>
+                <td>{i+1}</td>
+                <td><a href="{source.get('url', '#')}" target="_blank">{source.get('title', source.get('url', 'Unknown source'))}</a></td>
+                <td>{source.get('similarity', 0) * 100:.1f}%</td>
+            </tr>
+            """
+        
+        html += """
+        </table>
+        """
+    else:
+        html += "<p>No sources were found matching this text.</p>"
+    
+    html += f"""
+        <h2>Highlighted Text</h2>
+        <div class="highlighted-text">
+            {highlighted_text}
+        </div>
+        
+        <div class="report-footer">
+            <p>This report was generated by AutoType Plagiarism Checker. For educational purposes only.</p>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return html
+
+
+def generate_text_report(plagiarism_results: Dict[str, Any], text: str) -> str:
+    """
+    Generate a plain text report of plagiarism detection results.
+    
+    Args:
+        plagiarism_results: Results from the plagiarism checker
+        text: The original text that was checked
+    
+    Returns:
+        Text report as a string
+    """
+    similarity_score = plagiarism_results.get("similarityScore", 0) * 100
+    sources = plagiarism_results.get("sources", [])
+    
+    report = f"""
+PLAGIARISM CHECK REPORT
+Generated on {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+OVERALL SIMILARITY SCORE: {similarity_score:.1f}%
+
+MATCHED SOURCES ({len(sources)}):
+"""
+    
+    if sources:
+        for i, source in enumerate(sources):
+            report += f"""
+{i+1}. {source.get('title', source.get('url', 'Unknown source'))}
+   URL: {source.get('url', 'N/A')}
+   Match: {source.get('similarity', 0) * 100:.1f}%
+   Matched text: {source.get('matchedText', 'N/A')}
+"""
+    else:
+        report += "\nNo sources were found matching this text.\n"
+    
+    report += """
+This report was generated by AutoType Plagiarism Checker. For educational purposes only.
+"""
+    
+    return report
+
+
+def save_report(report: str, output_path: str) -> str:
+    """
+    Save a report to a file.
+    
+    Args:
+        report: The report content
+        output_path: Path to save the report
+    
+    Returns:
+        The absolute path to the saved report
+    """
+    # Create the directory if it doesn't exist
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
+    
+    # Write the report to the file
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(report)
+    
+    return os.path.abspath(output_path) 

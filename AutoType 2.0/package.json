@@ -1,0 +1,52 @@
+{
+  "name": "autotype",
+  "version": "1.0.0",
+  "description": "Free, open-source application designed to assist students with their academic work",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "jest",
+    "build": "electron-builder",
+    "dev": "electron . --dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/autotype.git"
+  },
+  "keywords": [
+    "auto-typing",
+    "text-humanization",
+    "tone-adjustment",
+    "plagiarism-checker",
+    "academic-tool"
+  ],
+  "author": "AutoType Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^23.1.0",
+    "electron-builder": "^24.0.0",
+    "jest": "^29.5.0"
+  },
+  "dependencies": {
+    "python-shell": "^5.0.0"
+  },
+  "build": {
+    "appId": "com.autotype.app",
+    "productName": "AutoType",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icons/app.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "resources/icons/app.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "resources/icons/app.png"
+    }
+  }
+} 

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoType - Ethical Writing Assistant</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- Defer loading of scripts until after HTML is parsed -->
+  <script src="views/app.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="logo">
+        <h1>AutoType</h1>
+        <span class="version">v<span id="app-version">1.0.0</span></span>
+      </div>
+      <div class="theme-toggle">
+        <button id="theme-toggle-btn">Toggle Dark Mode</button>
+      </div>
+    </header>
+    
+    <nav class="app-nav">
+      <ul>
+        <li><button class="nav-btn active" data-view="auto-typer">Auto Typer</button></li>
+        <li><button class="nav-btn" data-view="humanizer">Text Humanizer</button></li>
+        <li><button class="nav-btn" data-view="tone-adjuster">Tone Adjuster</button></li>
+        <li><button class="nav-btn" data-view="plagiarism-checker">Plagiarism Checker</button></li>
+        <li><button class="nav-btn" data-view="settings">Settings</button></li>
+      </ul>
+    </nav>
+    
+    <main class="app-content">
+      <!-- Auto Typer View -->
+      <section id="auto-typer" class="view active">
+        <h2>Auto Typer</h2>
+        <div class="window-selector-container">
+          <h3>Target Window Selection</h3>
+          <div id="window-list" class="window-list"></div>
+          <div id="window-preview" class="window-preview">
+            <p>No window selected</p>
+          </div>
+        </div>
+        
+        <div class="typing-controls">
+          <div class="text-input-container">
+            <h3>Text to Type</h3>
+            <textarea id="typing-text" placeholder="Enter text to type..."></textarea>
+            <div class="paste-buttons">
+              <button id="paste-btn">Paste</button>
+              <button id="paste-plain-btn">Paste without formatting</button>
+            </div>
+          </div>
+          
+          <div class="typing-options">
+            <h3>Typing Options</h3>
+            <div class="option-group">
+              <label for="typing-speed">Typing Speed (WPM)</label>
+              <input type="range" id="typing-speed" min="40" max="250" value="120">
+              <span id="typing-speed-value">120</span>
+            </div>
+            
+            <div class="option-group">
+              <label for="typo-rate">Typo Rate (%)</label>
+              <input type="range" id="typo-rate" min="0" max="5" value="0">
+              <span id="typo-rate-value">0</span>
+            </div>
+            
+            <div class="option-group">
+              <label for="pause-after-comma">Pause after comma (ms)</label>
+              <input type="range" id="pause-after-comma" min="200" max="5000" value="500">
+              <span id="pause-after-comma-value">500</span>
+            </div>
+            
+            <div class="option-group">
+              <label for="pause-after-period">Pause after period (ms)</label>
+              <input type="range" id="pause-after-period" min="500" max="15000" value="1000">
+              <span id="pause-after-period-value">1000</span>
+            </div>
+            
+            <div class="option-group">
+              <label for="random-hesitation">Random hesitation (ms)</label>
+              <input type="range" id="random-hesitation" min="50" max="7000" value="500">
+              <span id="random-hesitation-value">500</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button id="start-typing-btn" class="primary-btn">Start Typing</button>
+          <button id="pause-typing-btn" disabled>Pause</button>
+          <button id="stop-typing-btn" disabled>Stop</button>
+        </div>
+        
+        <div id="typing-status" class="status-message"></div>
+      </section>
+      
+      <!-- Text Humanizer View -->
+      <section id="humanizer" class="view">
+        <h2>Text Humanizer</h2>
+        <div class="humanizer-container">
+          <div class="text-input-container">
+            <h3>Original Text</h3>
+            <textarea id="original-text" placeholder="Enter AI-generated text to humanize..."></textarea>
+            <div class="paste-buttons">
+              <button id="humanizer-paste-btn">Paste</button>
+              <button id="humanizer-paste-plain-btn">Paste without formatting</button>
+            </div>
+          </div>
+          
+          <div class="humanizer-options">
+            <h3>Humanization Options</h3>
+            <div class="option-group">
+              <label for="sentence-complexity">Sentence Complexity</label>
+              <input type="range" id="sentence-complexity" min="1" max="5" value="3">
+              <span id="sentence-complexity-value">3</span>
+            </div>
+            
+            <div class="option-group">
+              <label for="vocabulary-level">Vocabulary Level</label>
+              <input type="range" id="vocabulary-level" min="1" max="5" value="3">
+              <span id="vocabulary-level-value">3</span>
+            </div>
+            
+            <div class="option-group checkbox">
+              <input type="checkbox" id="add-filler-words">
+              <label for="add-filler-words">Add natural filler words</label>
+            </div>
+            
+            <div class="option-group checkbox">
+              <input type="checkbox" id="vary-sentence-beginnings">
+              <label for="vary-sentence-beginnings">Vary sentence beginnings</label>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button id="humanize-btn" class="primary-btn">Humanize Text</button>
+          </div>
+          
+          <div class="text-output-container">
+            <h3>Humanized Text</h3>
+            <textarea id="humanized-text" placeholder="Humanized text will appear here..." readonly></textarea>
+            <button id="copy-humanized-btn">Copy</button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Tone Adjuster View -->
+      <section id="tone-adjuster" class="view">
+        <h2>Tone Adjuster</h2>
+        <div class="tone-adjuster-container">
+          <div class="text-input-container">
+            <h3>Original Text</h3>
+            <textarea id="tone-original-text" placeholder="Enter text to adjust tone..."></textarea>
+            <div class="paste-buttons">
+              <button id="tone-paste-btn">Paste</button>
+              <button id="tone-paste-plain-btn">Paste without formatting</button>
+            </div>
+          </div>
+          
+          <div class="tone-options">
+            <h3>Tone Presets</h3>
+            <div class="tone-presets">
+              <button class="tone-preset-btn" data-preset="academic">Academic/Formal</button>
+              <button class="tone-preset-btn" data-preset="casual">Casual/Conversational</button>
+              <button class="tone-preset-btn" data-preset="professional">Professional/Business</button>
+              <button class="tone-preset-btn" data-preset="technical">Technical/Scientific</button>
+              <button class="tone-preset-btn" data-preset="creative">Creative/Narrative</button>
+            </div>
+            
+            <h3>Custom Tone</h3>
+            <div class="option-group">
+              <label for="formality-level">Formality Level</label>
+              <input type="range" id="formality-level" min="1" max="5" value="3">
+              <span id="formality-level-value">3</span>
+            </div>
+            
+            <div class="option-group">
+              <label for="technical-level">Technical Level</label>
+              <input type="range" id="technical-level" min="1" max="5" value="3">
+              <span id="technical-level-value">3</span>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button id="adjust-tone-btn" class="primary-btn">Adjust Tone</button>
+          </div>
+          
+          <div class="text-output-container">
+            <h3>Adjusted Text</h3>
+            <textarea id="tone-adjusted-text" placeholder="Tone-adjusted text will appear here..." readonly></textarea>
+            <button id="copy-tone-adjusted-btn">Copy</button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Plagiarism Checker View -->
+      <section id="plagiarism-checker" class="view">
+        <h2>Plagiarism Checker</h2>
+        <div class="plagiarism-checker-container">
+          <div class="text-input-container">
+            <h3>Text to Check</h3>
+            <textarea id="plagiarism-text" placeholder="Enter text to check for plagiarism..."></textarea>
+            <div class="paste-buttons">
+              <button id="plagiarism-paste-btn">Paste</button>
+              <button id="plagiarism-paste-plain-btn">Paste without formatting</button>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button id="check-plagiarism-btn" class="primary-btn">Check Plagiarism</button>
+          </div>
+          
+          <div id="plagiarism-results" class="plagiarism-results">
+            <h3>Plagiarism Results</h3>
+            <div class="similarity-indicator">
+              <div class="similarity-value">0%</div>
+              <div class="similarity-bar">
+                <div class="similarity-progress"></div>
+              </div>
+              <div class="similarity-label">Similarity</div>
+            </div>
+            
+            <div class="plagiarism-sources">
+              <h4>Potential Sources</h4>
+              <div id="sources-list" class="sources-list">
+                <p>No sources found</p>
+              </div>
+            </div>
+            
+            <div class="highlighted-text-container">
+              <h4>Highlighted Text</h4>
+              <div id="highlighted-text" class="highlighted-text">
+                <p>Check text to see highlighted potential plagiarism</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Settings View -->
+      <section id="settings" class="view">
+        <h2>Settings</h2>
+        <div class="settings-container">
+          <div class="settings-group">
+            <h3>General Settings</h3>
+            <div class="setting-item checkbox">
+              <input type="checkbox" id="dark-mode">
+              <label for="dark-mode">Dark Mode</label>
+            </div>
+            
+            <div class="setting-item checkbox">
+              <input type="checkbox" id="auto-save">
+              <label for="auto-save">Auto-save texts</label>
+            </div>
+          </div>
+          
+          <div class="settings-group">
+            <h3>Hotkeys</h3>
+            <div class="setting-item">
+              <label for="start-typing-hotkey">Start typing</label>
+              <input type="text" id="start-typing-hotkey" value="CTRL+SHIFT+A" readonly>
+              <button class="edit-hotkey-btn">Edit</button>
+            </div>
+            
+            <div class="setting-item">
+              <label for="pause-typing-hotkey">Pause/Resume typing</label>
+              <input type="text" id="pause-typing-hotkey" value="CTRL+SHIFT+F" readonly>
+              <button class="edit-hotkey-btn">Edit</button>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <button id="save-settings-btn" class="primary-btn">Save Settings</button>
+            <button id="reset-settings-btn">Reset to Defaults</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="app-footer">
+      <p>AutoType - Ethical Writing Assistant | MIT License</p>
+    </footer>
+  </div>
+</body>
+</html> 
